@@ -1,0 +1,69 @@
+- This will contain all the important points about this project with a structured hierarchy.
+
+- You can see the planning of this project in the image "Burger Builder.png"
+
+===============================================================================================================
+>> 1- The Layout:
+=================
+- Keep in mind, we're building the burger builder application so the goal is that users can use it to add ingredients and therefore build a burger.
+
+- If you think about UI, We should have a header as a navigation-bar where on right, we can go to all the previous orders or build the burger itself with some logo or text on the left.
+
+- Then we have the burger design as we want, to be constructed ingredient by ingredient. In order to have ingredients, we need some controls below the burger to add or remove a layer, like below:
+
+Meat    + More | - Less
+Bacon   + More | - Less
+Salad   + More | - Less
+Cheese  + More | - Less
+
+- We also need to see the price of the constructed burger, while adding the ingredients accordingly and a button for Checkout to buy our burger.
+
+===============================================================================================================
+>> 2- The Component Tree:   <<< You can see the image of the tree in the project >>>
+========================
+- We have our "App" component, in which we define a base "Layout" component for this application which is already defined above before.
+
+- The "Layout" component has a couple of components nested besides it, some component responsive for navigation and for the content, so the navigation on the other hand might be split up in a "Toolbar" and a "Side-Drawer" because we want to create a responsive application so we have to cater for both mobile devices and desktop devices.
+
+- Below the "Layout" we have four different components:
+1- "Toolbar" which is always displayed and the items we display on it varies by the viewport.
+2- "Side-Drawer" this is simply the side menu we can bring in when we're on the mobile device.
+3- "Backdrop" For the sideDrawer, we might need it if we want to show a modal for the check out.
+4- "{props.children}" We want to have something which we can dynamically wrap, so whichever page you want to display (Burger builder, previous orders, checkout page etc...). Later in the app, we're going to add routing so that we can navigate to different pages
+
+- "{props.children}" will contain different pages but essentially, we will have "Burger Builder" component which will nest three components.
+
+- The "Burger Builder" will have:
+1- "Build Controls" with all these ingredient buttons with More and Less to add like we showed above.
+2- "Burger" Which will be giving us the preview of the burger and should hold a couple of ingredient components which the user dynamically manages it with the "Build Controls". 
+3- "Modal" which gives us check out preview, so where we basically see a summary and could proceed to check out. That will wrap the props.children in a manner around any content we want to render in a modal.
+
+<<< NOTE >>> There are multiple components that will be added while developing but the above are ones to start with.
+
+===============================================================================================================
+>> 3- Planning the state:
+=========================
+A- We need to manage the ingredients of the burger that the user will add. It will contain of course the ingredients we will use with a counter of it.
+
+B- We also want to know if the user is currently checking out the burger, if you clicked on purchased or not.
+
+C- We need to always see the price and dynamically calculate and output it.
+
+>> Like so, 
+state = {
+    ingredients:[meat: 1, bacon: 2 ...],
+    purchased: true,
+    totalPrice: 15.00 // For example
+}
+
+- Now the question is, Where do we manage the state? We shouldn't use it in the "App" like usual but instead we use it in "Burger Builder" because the state we defined above is really related to this component.
+
+<<< NOTE >>> Always, set the state in the component at which it will be used only.
+
+===============================================================================================================
+>> 4- Start doing the project:
+==============================
+- As usual, we will create a new project with "npx create-react-app" command. And do the usual cleanup removing the unecessary files from the project.
+
+- 
+
