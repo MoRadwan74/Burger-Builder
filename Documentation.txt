@@ -65,5 +65,251 @@ state = {
 ==============================
 - As usual, we will create a new project with "npx create-react-app" command. And do the usual cleanup removing the unecessary files from the project.
 
-- 
+- We create the Layout component. We can use the App as our layout component but it's better to make focused components as each one to its functionality.
 
+- But first let's create some folders inside "src" directory. components and containers
+1- components will contain functional components that don't manage the state.
+2- containers will contain stateful components that can be class-based or functional components.
+
+- Inside the components folder, we create "Layout" folder that will contain "Layout.js" and its CSS file if needed. In "Layout" we need two areas or divs, One for "Toolbar, SideDrawer, Backdrop" so we in the future we need to repace this div with these three components. The second will be the "main" element provided by HTML and there we want to output the component we wrap with this layout. So we use {props.children}.
+
+- We will not use the div as our root element in this component, we will use the hoc (Higher Order Component), Auxilliary. So let's create a folder for it in "src" folder as "hoc". Then create the Aux.js component which will just return props.children like below,
+
+>> The code of "Auxilliary.js" component:
+=========================================
+const auxilliary = (props) => props.children;
+
+export default auxilliary;
+*****************************************End of the Code*******************************************************
+
+- Then we import it in "Layout" and wrap the elements with it.
+
+<<< NOTE >>> We can wrap the elements with div element as usual. (The used method is just an elegant way)
+
+>> The code of "Layout.js" component:
+==================================
+import React from 'react';
+import Aux from '../../hoc/Auxilliary';
+
+const layout = (props) => (
+    <Aux>
+        <div>Toolbar, SideDrawer, Backdrop</div>
+        <main>
+            {props.children}
+        </main>
+    </Aux>
+);
+
+export default layout;
+*****************************************End of the Code*******************************************************
+
+- Now we can use the "Layout" component in "App.js" by importing and using it.
+
+>> The code of "App.js" component:
+=================================
+import React, {Component} from 'react';
+import Layout from './components/Layout/Layout';
+
+class App extends Component{
+  render(){
+    return(
+      <div>
+        <Layout>
+
+        </Layout>
+      </div>
+    );
+  }
+}
+
+export default App;
+*****************************************End of the Code*******************************************************
+
+- Now we will not implement the navbar or toolbar, instead we focus on the core functionality of our app, The burger builder.
+
+- We already said that the state will be managed in "Burger Builder" component so inside containers folder, we create a folder named "BurgerBuilder" at which we create the "BurgerBuilder.js" file.
+
+- Inside the return statement in the render function, don't forget to wrap your JSX elements with Auxilliary component.
+
+- We need to return two adjacent components, The first one is "Burger" which will be graphical representation of the burger with all the chosen ingredients. The second one is "Build Controls" that will be an area to add or remove ingredients to the burger.
+
+>> The code in "BurgerBuilder" component:
+========================================
+import React, {Component} from 'react';
+
+class BurgerBuilder extends Component{
+    render(){
+        <Aux>
+            <div>Burger</div>
+            <div>Build Controls</div>
+        </Aux>
+    }
+}
+
+export default BurgerBuilder;
+*****************************************End of the Code*******************************************************
+
+- Let's now add it to "App.js"
+
+>> The code in "App" component:
+===============================
+import React, {Component} from 'react';
+import Layout from './components/Layout/Layout';
+import BurgerBuilder from './containers/BurgerBuilder/BurgerBuilder';
+
+class App extends Component{
+  render(){
+    return(
+      <div>
+        <Layout>
+          <BurgerBuilder/>
+        </Layout>
+      </div>
+    );
+  }
+}
+
+export default App;
+*****************************************End of the Code*******************************************************
+
+- Now we just add some CSS for the "Layout" adding some margin at the top. In Layout folder, create a CSS file named "Layout.module.css" and we must write the "module" word to include CSS Modules. Then create a class named "Content" that will be used in "Layout.js" file.
+>> The code in "Layout.module.css":
+===================================
+.Content{
+    margin-top: 16px;
+}
+
+>> The code in "Layout" component:
+==================================
+import React from 'react';
+import Aux from '../../hoc/Auxilliary';
+import classes from './Layout.module.css';
+const layout = (props) => (
+    <Aux>
+        <div>Toolbar, SideDrawer, Backdrop</div>
+        <main className={classes.Content}>
+            {props.children}
+        </main>
+    </Aux>
+);
+
+export default layout;
+*****************************************End of the Code*******************************************************
+
+- Now let's implement the "Burger" component with its ingredients. Inside components folder, we create a folder called "Burger" that will include the "Burger" component. 
+
+- But the burger will not be enough we need to include the ingredients of it. So inside the newly created "Burger" folder, we create another folder that's called "BurgerIngredient" which will contain the "BurgerIngredient" component.
+
+- Also note that Maximillian made a CSS file for "BurgerIngredient" component that contains the graphical representation of the burger with its ingredients using CSS Modules. So you can find it as "BurgerIngredient.module.css"
+
+- Now we need to add some logic to render a specifc JSX code for a specifc ingredient based on some input information via props.
+
+- Let's create a variable called "ingredient" that will contain the chosen (Will-Be-Rendered) JSX code and set it initially to null.
+
+- Then using switch statement, we set the variable "ingredient" for each case. Also, make sure to add "props.type" as an input to the switch statement to classify the cases based on the different ingredients like Cheese, meat, bacon etc...
+
+- Don't forget to import the "BurgerIngredient.module.css" file with its class defined in the import statement like that:
+>> import classes from './BurgerIngredient.module.css';
+
+- Then inside each JSX div, assign the corresponding class with the naming defined in "BurgerIngredient.module.css" file.
+
+>> The code in "BurgerIngredient" component:
+============================================
+import React from 'react';
+import classes from './BurgerIngredient.module.css';
+
+const burgerIngredient = (props) =>{
+    let ingredient = null;
+
+    switch(this.props.type){
+            case('bread-bottom'):
+                ingredient = <div className={classes.BreadBottom}></div>;
+                break;
+            case('bread-top'):
+                ingredient =(
+                    <div className={classes.BreadTop}>
+                        <div className={classes.Seeds1}></div>
+                        <div className={classes.Seeds2}></div>
+                    </div>
+                );
+                break;
+            case('meat'):
+                ingredient = <div className={classes.Meat}></div>;
+                break;
+            case('cheese'):
+                ingredient = <div className={classes.Cheese}></div>;
+                break;
+            case('salad'):
+                ingredient = <div className={classes.Salad}></div>;
+                break;
+            case('bacon'):
+                ingredient = <div className={classes.Bacon}></div>;
+                break;
+            default:
+                ingredient = null;
+        }
+
+    return ingredient;
+};
+
+BurgerIngredient.prop-type = {
+    type: PropType.string.isRequired
+};
+
+export default burgerIngredient;
+*****************************************End of the Code*******************************************************
+- At last, we can add a prop-type validation to make sure that we do recieve a type property. We need to install the package first.
+>> npm install --save prop-types
+
+- For no reasons, let's convert this component to class-based one and import prop-types in it also. We need to make sure that the type is string and we can chain another condition that it's required so whenever we try to use the ingredient component without passing a type, we will get an error.
+
+>> The code in "BurgerIngredient" component:
+============================================
+import React, {Component} from 'react';
+import classes from './BurgerIngredient.module.css';
+import PropTypes from 'prop-types';
+
+class BurgerIngredient extends Component {
+    render(){
+        let ingredient = null;
+
+        switch(this.props.type){
+            case('bread-bottom'):
+                ingredient = <div className={classes.BreadBottom}></div>;
+                break;
+            case('bread-top'):
+                ingredient =(
+                    <div className={classes.BreadTop}>
+                        <div className={classes.Seeds1}></div>
+                        <div className={classes.Seeds2}></div>
+                    </div>
+                );
+                break;
+            case('meat'):
+                ingredient = <div className={classes.Meat}></div>;
+                break;
+            case('cheese'):
+                ingredient = <div className={classes.Cheese}></div>;
+                break;
+            case('salad'):
+                ingredient = <div className={classes.Salad}></div>;
+                break;
+            case('bacon'):
+                ingredient = <div className={classes.Bacon}></div>;
+                break;
+            default:
+                ingredient = null;
+        }
+
+    return ingredient;
+    }
+}
+
+BurgerIngredient.propTypes = {
+    type: PropTypes.string.isRequired
+};
+
+export default BurgerIngredient;
+*****************************************End of the Code*******************************************************
+
+- Now after dealing with the burger ingredients, we shall start building our "Burger" component.
