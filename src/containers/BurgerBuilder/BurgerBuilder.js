@@ -28,9 +28,12 @@ class BurgerBuilder extends Component{
             ...this.state.ingredients
         };
         updatedIngredients[type] = updatedCount;
+
+        // To track the price of the constructed Burger
         const priceAddition = INGREDIENT_PRICES[type];
         const oldPrice = this.state.totalPrice;
         const newPrice = oldPrice + priceAddition;
+
         this.setState({
             totalPrice: newPrice,
             ingredients: updatedIngredients
@@ -39,6 +42,8 @@ class BurgerBuilder extends Component{
 
     removeIngredientHandler = (type) =>{
         const oldCount = this.state.ingredients[type];
+
+        // Condition to check if the array "transformedIngredients" is zero or less
         if (oldCount <= 0){
             return;
         }
@@ -47,9 +52,12 @@ class BurgerBuilder extends Component{
             ...this.state.ingredients
         };
         updatedIngredients[type] = updatedCount;
+
+        // To track the price of the constructed Burger
         const priceDeduction = INGREDIENT_PRICES[type];
         const oldPrice = this.state.totalPrice;
         const newPrice = oldPrice - priceDeduction;
+
         this.setState({
             totalPrice: newPrice,
             ingredients: updatedIngredients
@@ -60,9 +68,12 @@ class BurgerBuilder extends Component{
         const disabledInfo = {
             ...this.state.ingredients
         };
-        for(let key in disabledInfo){
-            disabledInfo[key] = disabledInfo[key] <= 0
+        // eslint-disable-next-line
+        for(let key in disabledInfo){   
+            disabledInfo[key] = disabledInfo[key] <= 0  
+            // disabledInfo[key] should be true or false, if it's true(meaning no ingredients), we should disable.
         }
+        // {salad: true, meat: false, ...}
         return(
             <Aux>
                 <Burger ingredients={this.state.ingredients}/>
