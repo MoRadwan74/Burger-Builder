@@ -886,3 +886,201 @@ addIngredientHandler = (type) =>{
     disabled={props.disabled}>Less</button>
 
 - So far we have built a full functional burger but one thing left, we need to add the Purhcase order button.
+
+- Now let's create a Modal which allows us to display an order summary. This should be shown when we click "Checkout" or purchase order. As this button should be under "BuildControls" section we can include it in this component.
+
+- We simply make a normal HTML button like that,
+>> <button>ORDER NOW</button>
+
+- Add some style for this button in "BuildControls.module.css". This styles include the normal styling of the button, the disabled style when we can't click it because there're no ingredients added and some animations to bring up the button after it's disabled. Import it like the noraml way.
+
+- Let's do the logic of disabling the button. We will make it in "BurgerBuilder" as it contain the ingredients state object and how much of each ingredient we wanted to add to that burger. What we need is the total amount of ingredients or sum of all of them to check if there's at least one ingredients so that we can enable the button.
+
+- Let's start with adding a property to the state called "purchasable" and set to false initially as expected.
+>> state={
+        ingredients:{
+            salad:0,
+            bacon:0,
+            cheese:0,
+            meat:0
+        },
+        totalPrice: 4,
+        purchasable: false
+};
+
+- Now purchasable should be true once at least one ingredient is added to the burger. Let's add a method called "updatedPurchaseState" this method will be responsible for updating the property "purchasable" if needed. We need to check the ingredients in the state.
+>> updatedPurchaseState() {
+    const ingredients = {
+        ...this.state.ingredients
+    };
+}
+
+- We need to sum up all the values in the ingredients but we need to convert it into an array so we create constant called "sum" that should contain the total of the added ingredients.
+>> updatedPurchaseState() {
+    const ingredients = {
+        ...this.state.ingredients
+    };
+
+    const sum = Object.keys(ingredients)
+        .map(igKey =>{
+            return ingredient[igKey];
+        });
+}
+
+<<< NOTE >>> We return the value of each key in ingredients to the constant "sum". For example we access the value of certain property let's assume that we have state like that,
+>> state={
+        ingredients:{
+            salad:1,
+            bacon:0,
+            cheese:1,
+            meat:2
+        }
+- Then we got an array of [1, 0, 1, 2] which is the sum array.
+
+- Now we need to add all the elements togther but inside the same array so we use the method "reduce".
+>> const sum = Object.keys(ingredients)
+        .map(igKey =>{
+            return ingredient[igKey];
+        })
+        .reduce((sum, el)=>{
+            return sum + el;
+        }, 0);
+}
+
+- Now we complete this logic we pass it down to "BuildControls" component as a prop like that,
+>> <BuildControls 
+        ingredientAdded={this.addIngredientHandler} 
+         ingredientRemoved={this.removeIngredientHandler}
+        disabled={disabledInfo}
+        price={this.state.totalPrice}
+        purchasable={this.state.purchasable}
+/>
+
+- In "BuildControls", we add to the property for HTML button "disabled" this prop but with inverting the {props.purchasable},
+>>  <button className={classes.OrderButton} disabled={!props.purchasable}>ORDER NOW</button> 
+
+- We then call the funtion at the end of addIngredientHandler and removeIngredientHandler methods.
+
+- If we try to run this we will notice that when we add the first ingredient, nothing changes !! but if we add another ingredient we see the logic works. This because due to how "setState" works, in the first time we may get old values of the state instead of the new so we can overcome this by adding the "updatedIngredients" as a parameter to the function when we call it at the end of these two functions.
+
+- In this way, we ensure we got the new right value of the state. And if we run this, it should work smoothly.
+
+>> So the code in "BurgerBuilder" component:
+=============================================================================
+import React, {Component} from 'react';
+import Aux from '../../hoc/Auxilliary';
+import Burger from '../../components/Burger/Burger';
+import BuildControls from '../../components/Burger/BuildControls/BuildControls'
+
+const INGREDIENT_PRICES = {
+    salad: 0.5,
+    cheese: 0.4,
+    meat: 1.3,
+    bacon: 0.7
+}
+
+class BurgerBuilder extends Component{
+    state={
+        ingredients:{
+            salad:0,
+            bacon:0,
+            cheese:0,
+            meat:0
+        },
+        totalPrice: 4,
+        purchasable: false
+    };
+
+    updatePurchaseState (ingredients){
+        // eslint-disable-next-line
+        const sum = Object.keys(ingredients)
+            .map(igKey =>{
+                return ingredients[igKey];
+            })
+            .reduce((sum, el) => {
+                return sum + el
+            }, 0);
+            // We use zero to indicate we don't add an outside value on the sum
+        
+        // At the end, sum either will be zero indicating no ingredients added or any other value representing the number of ingredients.
+
+        this.setState({purchasable: sum > 0});
+        // This will either true or false based on sum > 0 or not.
+    }
+
+    addIngredientHandler = (type) =>{
+        const oldCount = this.state.ingredients[type];
+        const updatedCount = oldCount + 1;
+        const updatedIngredients ={
+            ...this.state.ingredients
+        };
+        updatedIngredients[type] = updatedCount;
+
+        // To track the price of the constructed Burger
+        const priceAddition = INGREDIENT_PRICES[type];
+        const oldPrice = this.state.totalPrice;
+        const newPrice = oldPrice + priceAddition;
+
+        this.setState({
+            totalPrice: newPrice,
+            ingredients: updatedIngredients
+        });
+
+        this.updatePurchaseState(updatedIngredients);
+    }
+
+    removeIngredientHandler = (type) =>{
+        const oldCount = this.state.ingredients[type];
+
+        // Condition to check if the array "transformedIngredients" is zero or less
+        if (oldCount <= 0){
+            return;
+        }
+        const updatedCount = oldCount - 1;
+        const updatedIngredients ={
+            ...this.state.ingredients
+        };
+        updatedIngredients[type] = updatedCount;
+
+        // To track the price of the constructed Burger
+        const priceDeduction = INGREDIENT_PRICES[type];
+        const oldPrice = this.state.totalPrice;
+        const newPrice = oldPrice - priceDeduction;
+
+        this.setState({
+            totalPrice: newPrice,
+            ingredients: updatedIngredients
+        });
+
+        this.updatePurchaseState(updatedIngredients);
+    }
+
+    render(){
+        const disabledInfo = {
+            ...this.state.ingredients
+        };
+        // eslint-disable-next-line
+        for(let key in disabledInfo){   
+            disabledInfo[key] = disabledInfo[key] <= 0  
+            // disabledInfo[key] should be true or false, if it's true(meaning no ingredients), we should disable.
+        }
+        // {salad: true, meat: false, ...}
+        return(
+            <Aux>
+                <Burger ingredients={this.state.ingredients}/>
+                <BuildControls 
+                    ingredientAdded={this.addIngredientHandler} 
+                    ingredientRemoved={this.removeIngredientHandler}
+                    disabled={disabledInfo}
+                    price={this.state.totalPrice}
+                    purchasable={this.state.purchasable}
+                />
+            </Aux>
+        );
+    }
+}
+
+export default BurgerBuilder;
+*****************************************End of the Code*******************************************************
+
+- Now we will implement the Modal that should preview when we click the order button. We said before that we might need a "Backdrop" component for the Modal so let's create it now.
