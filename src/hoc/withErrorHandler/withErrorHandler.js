@@ -5,10 +5,8 @@ import Aux from '../Auxilliary/Auxilliary';
 // This is not a functional component, it's just a normal function that returns a functional component.
 const withErrorHandler = (WrappedComponent, Axios) => {
     return class extends Component {
-        state = {
-            error: null
-        };
-        componentDidMount(){
+        constructor(props){
+            super(props);
             Axios.interceptors.request.use(req => {
                 this.setState({error: null});
                 return req;
@@ -17,6 +15,10 @@ const withErrorHandler = (WrappedComponent, Axios) => {
                 this.setState({error: error});
             });
         }
+
+        state = {
+            error: null
+        };
 
         errorConfirmedHandler = () =>{
             this.setState({error: null});
