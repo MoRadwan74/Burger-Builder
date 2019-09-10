@@ -117,7 +117,7 @@ class BurgerBuilder extends Component {
         this.setState({ loading: true });
         const order = {
             ingredients: this.state.ingredients,
-            price: this.state.totalPrice,    // We should calculate the total price on the server.
+            price: this.state.totalPrice,    // We should calculate the total price on the server not here.
             // Some dummy order data (Later, we will add a form to submit this data by the user.)
             customer: {
                 name: 'Mohamed Radwan',
