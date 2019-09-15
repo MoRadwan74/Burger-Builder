@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Modal from '../../components/UI/Modal/Modal';
 import Aux from '../Auxilliary/Auxilliary';
 
-// This is not a functional component, it's just a normal function that returns a functional component.
+// This is not a functional component, it's just a normal JS function that returns a functional component.
 const withErrorHandler = (WrappedComponent, Axios) => {
     return class extends Component {
 
