@@ -112,31 +112,26 @@ class BurgerBuilder extends Component {
         this.setState({ purchasing: false });
     }
 
+    // Here we pass the ingredients of the burger to the URL in order to pass them down to Checkout component to render the REAL burger that the user selected.
     purchaseContinueHandler = () => {
-        //alert('You continue!');
-        this.setState({ loading: true });
-        const order = {
-            ingredients: this.state.ingredients,
-            price: this.state.totalPrice,    // We should calculate the total price on the server not here.
-            // Some dummy order data (Later, we will add a form to submit this data by the user.)
-            customer: {
-                name: 'Mohamed Radwan',
-                address: {
-                    street: 'Teststreet 1',
-                    zipCode: '41351',
-                    country: 'Egypt'
-                },
-                email: 'test@test.com'
-            },
-            deliveryMethod: 'fastest'
-        };
-        Axios.post('/orders.json', order)
-            .then(response => {
-                this.setState({ loading: false, purchasing: false });
-            })
-            .catch(error => {
-                this.setState({ loading: false, purchasing: false });
-            });
+        // //alert('You continue!');
+        // eslint-disable-next-line
+        {/* WE COMMENT THE ABOVE CODE AS WE NO LONGER WANT TO POST TO FIREBASE, WE WANT TO GO TO THE CHECKOUT COMPONENT INSTEAD. NOW IT'S MOVED TO CONTACTDATA*/}
+        const queryParams = [];
+        // eslint-disable-next-line
+        for (let i in this.state.ingredients){
+            queryParams.push(encodeURIComponent(i) + '=' + encodeURIComponent(this.state.ingredients[i]));  
+            // Array of a couple of strings which is propertyName = propertyValue. i.e. salad=2
+            // Here, we use "encodeURIComponent" to remove the whitespaces that may occur so that we can put these strings to the URL. (In our case, we don't need that.)
+        }
+        // To pass the total price down into ContactData in order to show it
+        queryParams.push('price=' + this.state.totalPrice);
+        
+        const queryString = queryParams.join('&');
+        this.props.history.push({
+            pathname: '/checkout',
+            search: '?' + queryString
+        });
     }
 
     render() {
