@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import classes from './ContactData.module.css';
 import Axios from '../../../axios-orders';
 import Spinner from '../../../components/UI/Spinner/Spinner';
+import Button from '../../../components/UI/Button/Button';
 import Input from '../../../components/Input/Input';
 
 class ContactData extends Component {
@@ -14,7 +15,12 @@ class ContactData extends Component {
                     type: 'text',
                     placeholder: 'Your Name'
                 },
-                value: ''
+                value: '',
+                validation:{    // To check for formElement Validity
+                    required: true
+                },
+                valid: false,
+                touched: false
             },
             street:{
                 elementType: 'input',
@@ -22,7 +28,12 @@ class ContactData extends Component {
                     type: 'text',
                     placeholder: 'Street'
                 },
-                value: ''
+                value: '',
+                validation:{
+                    required: true
+                },
+                valid: false,
+                touched: false
             },
             zipCode:{
                 elementType: 'input',
@@ -30,7 +41,14 @@ class ContactData extends Component {
                     type: 'text',
                     placeholder: 'ZIP Code'
                 },
-                value: ''
+                value: '',
+                validation:{
+                    required: true,
+                    minLength: 5,
+                    maxLength: 5
+                },
+                valid: false,
+                touched: false
             },
             country:{
                 elementType: 'input',
@@ -38,7 +56,12 @@ class ContactData extends Component {
                     type: 'text',
                     placeholder: 'Your Country'
                 },
-                value: ''
+                value: '',
+                validation:{
+                    required: true
+                },
+                valid: false,
+                touched: false
             },
             email:{
                 elementType: 'input',
@@ -46,7 +69,12 @@ class ContactData extends Component {
                     type: 'email',
                     placeholder: 'Your Email'
                 },
-                value: ''
+                value: '',
+                validation:{
+                    required: true
+                },
+                valid: false,
+                touched: false
             },
             deliveryMethod:{
                 elementType: 'select',
@@ -56,9 +84,11 @@ class ContactData extends Component {
                         {value: 'cheapest', displayValue: 'Cheapest'}
                     ]
                 },
-                value: ''
+                value: '',
+                valid: true
             },
         },
+        formIsValid: false,
         loading: false
     };
 
@@ -85,6 +115,26 @@ class ContactData extends Component {
             });
     }
 
+    // Function for form validation
+    checkValidiy = (value, rules) => {
+        // We add the below check as rules parameter can be undefined for the case of dropdown "deliveryMethod".
+        if(!rules){
+            return true;
+        }
+        let isValid = false;
+        // Checking if there's an empty field
+        if (rules.required){
+            isValid = value.trim() !== '';  // trim() to remove any potential whitespace at the beginning or end.
+            // So isValid is updated to True or False depending on the check (value.trim() !== ''). For example, if the trimmed value is not equal to an empty string, then isValid will be True.
+        }
+        // Checking if the number is between the minimum number of letters AND the maximum number of them for ZIPCode.
+        if(rules.minLength){
+            isValid = value.length >= rules.minLength && value.length <= rules.maxLength;
+        }
+
+        return isValid;
+    }
+
     inputChangeHandler = (event, inputIdentifier) => {
         const updatedOrderForm = {...this.state.orderForm};
         //updatedOrderForm[inputIdentifier] // name, street, zipCode, country ...
@@ -92,12 +142,22 @@ class ContactData extends Component {
 
         // Here, we get the value property from updatedFormElement and set it to be the value of the target element. 
         updatedFormElement.value = event.target.value;
+        updatedFormElement.valid = this.checkValidiy(updatedFormElement.value, updatedFormElement.validation);
+
+        // Update this flag as the user touched the input field. 
+        updatedFormElement.touched = true;
 
         // Return up in the tree
         updatedOrderForm[inputIdentifier] = updatedFormElement;
         
+        let formIsValid = true;
+        // eslint-disable-next-line
+        for (let inputIdentifier in updatedOrderForm){
+            formIsValid = updatedOrderForm[inputIdentifier].valid && formIsValid;
+        }
         this.setState({
-            orderForm: updatedOrderForm
+            orderForm: updatedOrderForm,
+            formIsValid
         });
     }
 
@@ -122,10 +182,13 @@ class ContactData extends Component {
                             elementType={formElement.config.elementType}
                             elementConfig={formElement.config.elementConfig}
                             value={formElement.config.value}
-                            changed={(event) => this.inputChangeHandler(event, formElement.id)}/>
+                            changed={(event) => this.inputChangeHandler(event, formElement.id)}
+                            invalid={!formElement.config.valid}
+                            shouldValidate={formElement.config.validation}
+                            touched={formElement.config.touched}/>
                     ))
                 }
-                <button className={classes.Button}>ORDER</button>
+                <Button className={classes.Button} disabled={!this.state.formIsValid}>ORDER</Button>
             </form>
         );
         if (this.state.loading) {
