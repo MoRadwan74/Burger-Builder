@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {connect} from 'react-redux';
 
 import classes from './ContactData.module.css';
 import Axios from '../../../axios-orders';
@@ -101,7 +102,7 @@ class ContactData extends Component {
             formData[formElementIdentifier] = this.state.orderForm[formElementIdentifier].value; 
         }
         const order = {
-            ingredients: this.props.ingredients,
+            ingredients: this.props.ings,
             price: this.props.price,    // We should calculate the total price on the server not here.
             orderData: formData
         };
@@ -203,7 +204,14 @@ class ContactData extends Component {
     }
 }
 
-export default ContactData;
+const mapStateToProps = state => {
+    return {
+        ings: state.ingredients,
+        price: state.totalPrice
+    };
+}
+
+export default connect(mapStateToProps)(ContactData);
 /*
     1- Decide which kind of data that we need so that we store it in the state.
     2- Find a way to dynamically generating our form.

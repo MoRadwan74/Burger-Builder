@@ -11,6 +11,7 @@ class Orders extends Component{
         loading: true
     };
 
+    // We don't manage the orders of the state in the Redux store so far because orders is related to asynchronous code but it will be included in the next update
     componentDidMount(){
         Axios.get('/orders.json')
             .then(res => {
