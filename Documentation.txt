@@ -51,7 +51,7 @@ C- We need to always see the price and dynamically calculate and output it.
 
 >> Like so, 
 state = {
-    ingredients:[meat: 1, bacon: 2 ...],
+    ingredients:{meat: 1, bacon: 2 ...},
     purchased: true,
     totalPrice: 15.00 // For example
 }
@@ -65,5 +65,1022 @@ state = {
 ==============================
 - As usual, we will create a new project with "npx create-react-app" command. And do the usual cleanup removing the unecessary files from the project.
 
-- 
+- We create the Layout component. We can use the App as our layout component but it's better to make focused components as each one to its functionality. So that if we want to make large changes to the project for example we don't mess up with App.js the root component.
 
+- But first let's create some folders inside "src" directory. components and containers
+1- components will contain functional components that don't manage the state.
+2- containers will contain stateful components that can be class-based or functional components.
+
+- Inside the components folder, we create "Layout" folder that will contain "Layout.js" and its CSS file if needed. In "Layout" we need two areas or divs, One for "Toolbar, SideDrawer, Backdrop" so we in the future we need to repace this div with these three components. The second will be the "main" element provided by HTML and there we want to output the component we wrap with this layout. So we use {props.children}.
+
+- We will not use the div as our root element in this component, instead we use the hoc (Higher Order Component), Auxilliary. So let's create a folder for it in "src" folder as "hoc". Then create the Aux.js component which will just return props.children like below,
+
+>> The code of "Auxilliary.js" component:
+=========================================
+const auxilliary = (props) => props.children;
+
+export default auxilliary;
+*****************************************End of the Code*******************************************************
+
+- Then we import it in "Layout" and wrap the elements with it.
+
+<<< NOTE >>> We can wrap the elements with div element as usual. (The used method is just an elegant way)
+
+>> The code of "Layout.js" component:
+==================================
+import React from 'react';
+import Aux from '../../hoc/Auxilliary';
+
+const layout = (props) => (
+    <Aux>
+        <div>Toolbar, SideDrawer, Backdrop</div>
+        <main>
+            {props.children}
+        </main>
+    </Aux>
+);
+
+export default layout;
+*****************************************End of the Code*******************************************************
+
+- Now we can use the "Layout" component in "App.js" by importing and using it.
+
+>> The code of "App.js" component:
+=================================
+import React, {Component} from 'react';
+import Layout from './components/Layout/Layout';
+
+class App extends Component{
+  render(){
+    return(
+      <div>
+        <Layout>
+
+        </Layout>
+      </div>
+    );
+  }
+}
+
+export default App;
+*****************************************End of the Code*******************************************************
+
+- Now we will not implement the navbar or toolbar, instead we focus on the core functionality of our app, The burger builder.
+
+- We already said that the state will be managed in "Burger Builder" component so inside containers folder, we create a folder named "BurgerBuilder" at which we create the "BurgerBuilder.js" file.
+
+- Inside the return statement in the render function, don't forget to wrap your JSX elements with Auxilliary component.
+
+- We need to return two adjacent components, The first one is "Burger" itself which will be graphical representation of the burger with all the chosen ingredients. The second one is "Build Controls" that will be an area to add or remove ingredients to the burger.
+
+>> The code in "BurgerBuilder" component:
+========================================
+import React, {Component} from 'react';
+
+class BurgerBuilder extends Component{
+    render(){
+        <Aux>
+        <div>Burger</div>
+        <div>Build Controls</div>
+        </Aux>
+    }
+}
+
+export default BurgerBuilder;
+*****************************************End of the Code*******************************************************
+
+- Let's now add it to "App.js"
+
+>> The code in "App" component:
+===============================
+import React, {Component} from 'react';
+import Layout from './components/Layout/Layout';
+import BurgerBuilder from './containers/BurgerBuilder/BurgerBuilder';
+
+class App extends Component{
+  render(){
+    return(
+      <div>
+        <Layout>
+          <BurgerBuilder/>
+        </Layout>
+      </div>
+    );
+  }
+}
+
+export default App;
+*****************************************End of the Code*******************************************************
+
+- Now we just add some CSS for the "Layout" adding some margin at the top. In Layout folder, create a CSS file named "Layout.module.css" and we must write the "module" word to include CSS Modules. Then create a class named "Content" that will be used in "Layout.js" file.
+>> The code in "Layout.module.css":
+===================================
+.Content{
+    margin-top: 16px;
+}
+
+>> The code in "Layout" component:
+==================================
+import React from 'react';
+import Aux from '../../hoc/Auxilliary';
+import classes from './Layout.module.css';
+
+const layout = (props) => (
+    <Aux>
+        <div>Toolbar, SideDrawer, Backdrop</div>
+        <main className={classes.Content}>
+            {props.children}
+        </main>
+    </Aux>
+);
+
+export default layout;
+*****************************************End of the Code*******************************************************
+
+- Now let's implement the "Burger" component with its ingredients. Inside components folder, we create a folder called "Burger" that will include the "Burger" component. 
+
+- But the burger will not be enough we need to include the ingredients of it. So inside the newly created "Burger" folder, we create another folder that's called "BurgerIngredient" which will contain the "BurgerIngredient" component.
+
+- Also note that Maximillian made a CSS file for "BurgerIngredient" component that contains the graphical representation of the burger with its ingredients using CSS Modules. So you can find it as "BurgerIngredient.module.css"
+
+- Now we need to add some logic to render a specifc JSX code for a specifc ingredient based on some input information via props.
+
+- Inside "BurgerIndgredient" component, let's create a variable called "ingredient" that will contain the chosen (Will-Be-Rendered) JSX code and set it initially to null.
+
+- Then using switch statement, we set the variable "ingredient" for each case. Also, make sure to add "props.type" as an input to the switch statement to classify the cases based on the different ingredients like Cheese, meat, bacon etc...
+
+- Don't forget to import the "BurgerIngredient.module.css" file with its class defined in the import statement like that:
+>> import classes from './BurgerIngredient.module.css';
+
+- Then inside each JSX div, assign the corresponding class with the naming defined in "BurgerIngredient.module.css" file.
+
+>> The code in "BurgerIngredient" component:
+============================================
+import React from 'react';
+import classes from './BurgerIngredient.module.css';
+
+const burgerIngredient = (props) =>{
+    let ingredient = null;
+
+    switch(this.props.type){
+            case('bread-bottom'):
+                ingredient = <div className={classes.BreadBottom}></div>;
+                break;
+
+            case('bread-top'):
+                ingredient =(
+                    <div className={classes.BreadTop}>
+                        <div className={classes.Seeds1}></div>
+                        <div className={classes.Seeds2}></div>
+                    </div>
+                );
+            break;
+
+            case('meat'):
+                ingredient = <div className={classes.Meat}></div>;
+            break;
+
+            case('cheese'):
+                ingredient = <div className={classes.Cheese}></div>;
+            break;
+
+            case('salad'):
+                ingredient = <div className={classes.Salad}></div>;
+            break;
+
+            case('bacon'):
+                ingredient = <div className={classes.Bacon}></div>;
+            break;
+            
+            default:
+                ingredient = null;
+    }
+
+    return ingredient;
+};
+
+export default burgerIngredient;
+*****************************************End of the Code*******************************************************
+- At last, we can add a prop-type validation to make sure that we do recieve a type property. We need to install the package first.
+>> npm install --save prop-types
+
+- For no reasons, let's convert this component to a class-based one and import prop-types in it also. We need to make sure that the type is string and we can chain another condition that it's required so whenever we try to use the ingredient component without passing a type, we will get an error.
+
+>> The code in "BurgerIngredient" component:
+============================================
+import React, {Component} from 'react';
+import classes from './BurgerIngredient.module.css';
+import PropTypes from 'prop-types';
+
+class BurgerIngredient extends Component {
+    render(){
+        let ingredient = null;
+
+        switch(this.props.type){
+            case('bread-bottom'):
+                ingredient = <div className={classes.BreadBottom}></div>;
+                break;
+
+            case('bread-top'):
+                ingredient =(
+                    <div className={classes.BreadTop}>
+                        <div className={classes.Seeds1}></div>
+                        <div className={classes.Seeds2}></div>
+                    </div>
+                );
+            break;
+
+            case('meat'):
+                ingredient = <div className={classes.Meat}></div>;
+            break;
+
+            case('cheese'):
+                ingredient = <div className={classes.Cheese}></div>;
+            break;
+
+            case('salad'):
+                ingredient = <div className={classes.Salad}></div>;
+            break;
+
+            case('bacon'):
+                ingredient = <div className={classes.Bacon}></div>;
+            break;
+
+            default:
+                ingredient = null;
+        }
+
+    return ingredient;
+    }
+}
+
+BurgerIngredient.propTypes = {
+    type: PropTypes.string.isRequired
+};
+
+export default BurgerIngredient;
+*****************************************End of the Code*******************************************************
+
+- Now after dealing with the burger ingredients, we shall start building our "Burger" component. Let's create a functional component and of course we want to return the burger itself so we need to return the ingredients.
+
+- So we import "BurgerIngredient" component so that we can call the each ingredient as we want.
+
+- We use div to wrap our JSX code without any elegant ways to use. Then we add some styling for the burger itself to make it responsive for mobile devices, create a file called "Burger.module.css"
+
+>> The code in "Burger.module.css" component:
+=============================================
+.Burger{
+    width: 100%;
+    margin: auto;
+    height: 250px;
+    overflow: auto;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+@media (min-width: 500px) and (min-height:400px){
+    .Burger{
+        width: 350px;
+        height: 300px;
+    }
+}
+
+@media (min-width: 500px) and (min-height:401px){
+    .Burger{
+        width: 450px;
+        height: 400px;
+    }
+}
+
+@media (min-width: 1000px) and (min-height:700px){
+    .Burger{
+        width: 700px;
+        height: 600px;
+    }
+}
+*****************************************End of the Code*******************************************************
+
+- Let's import the CSS classes we just added. Now we can start adding ingredients so let's import this component also.
+
+>> The code in "Burger" component:
+==================================
+import React from 'react';
+import classes from './Burger.module.css';
+import BurgerIndgredient from './BurgerIngredient/BurgerIngredient';
+
+const burger = (props) =>{
+    return(
+        <div className={classes.Burger}>
+            <BurgerIndgredient type="bread-top"/>
+            // Some dynamic code to render the ingredients when they are chosen.
+            <BurgerIndgredient type="bread-bottom"/>
+        </div>
+    );
+};
+
+export default burger;
+*****************************************End of the Code*******************************************************
+
+- Back to "BurgerBuilder" component that should contain the burger with its build-controls and we add "Burger" component to it.
+
+>> The code in "BurgerBuilder" component:
+=========================================
+import React, {Component} from 'react';
+import Aux from '../../hoc/Auxilliary';
+import Burger from '../../components/Burger/Burger';
+
+class BurgerBuilder extends Component{
+
+    render(){
+        return(
+            <Aux>
+                <Burger/>
+                <div>Builder Controls</div>
+            </Aux>
+        );
+    }
+}
+
+export default BurgerBuilder;
+*****************************************End of the Code*******************************************************
+
+- You can see the burger graphical representation when running. The next step is to update this burger and add ingredients to it dynamically instead of just hard coding it.
+
+- We said before the state will include the ingredients that can be added to the burger so let's add it in "BurgerBuilder" component. We want to have "ingredients" object where we have key-value pairs where the keys are the names of the ingredients and the values are the amount.
+
+>> Snippet code from "BurgerBuilder" component:
+===============================================
+state={
+        ingredients:{
+            salad:1,
+            bacon:1,
+            cheese:2,
+            meat:2
+        }
+    };
+*****************************************End of the Code*******************************************************
+
+- Certainly, we need to pass the ingredients to "Burger" component as a prop.
+>> <Burger ingredient={this.state.ingredients}/> 
+
+- The thing is, "Burger" doesn't recieve any ingredients yet. So let's go to "Burger" component and start playing with the ingredients prop. 
+
+- The problem is that the ingredients that "Burger" recieves as a props is an object(as defined in the state of "BurgerBuilder") not an array so we can't use for example, the map function to loop through this object. So first we have to transform this object into an array (To be precise, convert this object into an array of the values of the ingredients).
+
+- Let's create a variable called "transformedIngredients" which will be the passed object "ingredients" but converted to an array. We will use the "Object" class because it has a "key" method which extracts the keys of a given object and turns that into an array (giving us an array of keys).
+>> let transformedIngredients = Object.key(props.ingredients)    // Note: props.ingredients is an object
+
+- We got an array of strings of keys like that ['salad', 'bacon', 'cheese', 'meat'].
+
+<<< NOTE >>> We don't use the values of each ingredient so far we only deal with the key elements.
+
+- Now we can use the map method as we have an array of ingredient keys. We know that "map" executes a function on each element in the given array. So we attach "map" to our "transformedIngredients" array with declaring each element as "igKey" which represents the one "ingredient Key" (that can be meat or salad etc...).
+
+>> let transformedIngredients = Object.key(props.ingredients).map(igKey =>{
+    return // Some code
+});
+
+- Here, we need to transform this string value into an array with as many elements as we have ingredients for a given ingredient. For example, if we have two cheese ingredients then that cheese string need to be transformed into an array which simply contains two elements.
+
+- Then we will return an array and we will have to use the spread operator to spread a new array that we have to construct. We construct it using the "Array" method which takes the length of the needed array as an argument. Which in our case will be the amount of the ingredient itself.
+
+>> let transformedIngredients = Object.key(props.ingredients).map(igKey =>{
+    return [...Array(props.ingredients[igKey])]
+});
+
+<<< NOTE >>> This statement "props.ingredients[igKey]" might be unclear, it means go to the object "ingredients" and with the given ingredient (which is igKey), search inside the object for a match then return the matched element. For example if the statement like that "props.ingredients['salad']" this will return the element that is called "salad" defined in the state if "BurgerBuilder".
+
+- To make it clear now we have an array of one ingredient. Now the array that would be "salad" or "meat", may contain one element or two or nothing based on the value of this ingredient. So we map this array with the "map" method so that the newly-created-array length would represent the value of the ingredient (the value of the key in the object ingredients).
+
+- Now this map would have two parameters, an initial value (which we don't need to pass and we will pass _ indicating BLANK input) and an index which we will pass of course.
+
+>> let transformedIngredients = Object.key(props.ingredients).map(igKey =>{
+    return [...Array(props.ingredients[igKey])].map((_, i) => {
+
+    });
+});
+
+- Now inside that "Map" method we need to return "BurgerIngredient" component as we want to show the graphical representation for the given ingredient. And we will pass two values, the first one is the "key" because we return an array of JSX elements and each one should have a unique key and it can be like that,
+>> <BurgerIngredient key={igKey + i} />     
+// key can be something like "salad0" or "salad1" according to the number of layers for a given ingredient.
+
+- The second one is of course the "type" of the ingredient that "BurgerIngredient" is expecting.
+
+>> let transformedIngredients = Object.key(props.ingredients).map(igKey =>{
+    return [...Array(props.ingredients[igKey])].map((_, i) => {
+        return <BurgerIngredient key={igKey + i} type={igKey} />
+    });
+});
+
+- Now we have finished our transformedIngredients and it's time to return them. We will always have BreadTop and BreadBottom but in between we will have multiple layers to add. So there, we will add this variable.
+
+>> The code in "Burger" component:
+==================================
+import React from 'react';
+import classes from './Burger.module.css';
+import BurgerIndgredient from './BurgerIngredient/BurgerIngredient';
+
+const burger = (props) =>{
+    // transform the object (ingredients) ==> the array (transformedIngredients) to manipulate it easily.
+    let transformedIngredients = Object.keys(props.ingredients)
+        .map(igKey =>{
+            return [...Array(props.ingredients[igKey])].map((_, i) => {
+                return <BurgerIndgredient key={igKey + i} type={igKey}/>;
+            });
+        });
+    return(
+        <div className={classes.Burger}>
+            <BurgerIndgredient type="bread-top"/>
+            {transformedIngredients}
+            <BurgerIndgredient type="bread-bottom"/>
+        </div>
+    );
+};
+
+export default burger;
+*****************************************End of the Code*******************************************************
+
+- We can see now that the ingredients are added according to the initialized values in the state of "BurgerBuilder".
+
+- So far we successfully made the burger and outputed a list of burger ingredients. But there's something though, if we set all the ingredients values to zero like that,
+>> state={
+        ingredients:{
+            salad:0,
+            bacon:0,
+            cheese:0,
+            meat:0
+    }
+- It will just render the BreadTop and BreadBottom, it would be nice if we add between them a message to the user if there's no ingredients to render, to add some.
+
+- To show something if we have no ingredients, we need to find out if we got no ingredients first. For this case, transformedIngredients should be an array of "empty arrays" and if we try to,
+>> console.log(transformedIngredients);
+- It will print ==> (4) [Array(0), Array(0), Array(0), Array(0)] and this means that we have printed an array of 4 elements (bacon, meat, cheese, salad) and each one is an array of zero elements (indicating no layers are added yet). 
+
+- So this is kinda hard to check for us. We can flatten this array "transformedIngredients" to make sure we pull out the values of these inner arrays and trade one array which contains all these values.
+
+- We can do that by adding a JS method called "reduce" to our "transformedIngredients" array. This function allows us to transform an array into something else. It takes a function as an input which recieves two arguments passed in automatically by JS which are (the previous value and the current value). It also accepts an initial value, let's say an empty array. 
+>> .reduce((arr, el) => {
+
+}, []);
+
+- We also need to adjust this reduced value by returning something and it will then loop through all the elements and simply add them to the initial values step by step. So, We will return the updated values starting with the initial one(which is the empty []) which is then stored in the first argument which we recieve in each loop here. So array "arr" will be always the updated root array that will be returned in the end.
+
+- We simply concate the "el" with this updated "arr" like that,
+>> .reduce((arr, el) => {
+    return arr.concate(el)
+    }, []);
+- This will simply take the given element through which we're looping and add it to this array "arr".
+
+- If we save this and use the same "console.log" statement, we will get one empty array as expected. And finally we can check this array if it's empty (indicating no ingredients added so far) and print out a message to the user to add some.
+>> if (transformedIngredients.length === 0){
+    transformedIngredients = <p>Please start adding ingredients!</p>;
+}
+
+- If we run this we can see that initially we print out "Please start adding ingredients!" between the two bread sections until the user adds an ingredient.
+
+>> The code in "Burger" component:
+==================================
+import React from 'react';
+import classes from './Burger.module.css';
+import BurgerIndgredient from './BurgerIngredient/BurgerIngredient';
+
+const burger = (props) =>{
+    // transform the object (ingredients) ==> the array (transformedIngredients) to manipulate it easily.
+    let transformdIngredients = Object.keys(props.ingredients)
+        .map(igKey =>{
+            return [...Array(props.ingredients[igKey])].map((_, i) => {
+                return <BurgerIndgredient key={igKey + i} type={igKey}/>;
+            });
+        })
+        .reduce((arr, el) => {
+            return arr.concat(el)
+        }, []);
+        if(transformedIngredients.length === 0){
+            transformedIngredients = <p>Please start adding ingredients!</p>;
+        }
+    return(
+        <div className={classes.Burger}>
+            <BurgerIndgredient type="bread-top"/>
+            {transformedIngredients}
+            <BurgerIndgredient type="bread-bottom"/>
+        </div>
+    );
+};
+
+export default burger;
+*****************************************End of the Code*******************************************************
+
+- Now we have finished the burger logic and we can start building the logic of the controls to add or remove a specifc ingredient to the burger. So inside "Burger" folder, create folder named "BuildControls" in which we can create "BuildControls" component.
+
+>> The code in "BuildControls" Component:
+=========================================
+import React from 'react';
+
+const buildControls = (props) => (
+    <div>
+        
+    </div>
+);
+
+export default buildControls;
+*****************************************End of the Code*******************************************************
+
+- Before implementing this component, we will add some style so create a CSS file called "BuildControls.module.css" with this code inside it,
+>> .BuildControls{
+    width: 100%;
+    background-color: #CF8F2E;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    box-shadow:0 2px 1px #CCC;
+    margin: auto;
+    padding: 10px 0;
+}
+
+- Let's import it to "BuildControls" component.
+
+- Now let's focus on implementing the controls, it's more convenient to make a nested component inside "BuildControls" folder because it's not just one button, it's a label with two buttons and a reusable UI element so putting it in a new component makes sense.
+
+- Inside "BuildControls" folder we add a "BuildControl" folder that should contain "BuildControl" component. Let's also add a CSS file with the same naming convention we used before.
+
+- We also get the CSS from a file that is created by Maximillian, GOD BLESS HIM.
+
+- Starting with the "BuildControl" component, it will be of course functional component that will recieve props and return some JSX as usual. So basically, this component will return 3 JSX elements.
+
+1- A div that contain the name of the ingredient I want to. So there we want to output something dynamically. As we will recieve a prop for it let's called it "label".
+2- A button for removing an ingredient "Less".
+3- A button for adding an ingredient "More".
+
+>> The code in "BuildControl" component:
+========================================
+import React from 'react';
+import classes from './BuildControl.module.css';
+
+const buildControl = (props) => (
+    <div className={classes.BuildControl}>
+        <div className={props.Label}>{props.label}</div>
+        <button {props.Less}>Less</button>
+        <button {props.More}>More</button>
+    </div>
+);
+
+export default buildControl;
+*****************************************End of the Code*******************************************************
+
+- Now the "BuildControl" component is finished and we can move on the "BuildControls" one and output a couple of BuildControls
+
+- First we will create an array named "controls" for which we can loop to build controls for each ingredient. So we will have some objects each will have a label and type. Like that:
+>> const controls = [
+    {label:'Salad', type:'salad'},
+    {label:'Bacon', type:'bacon'},
+    {label:'Cheese', type:'cheese'},
+    {label:'Meat', type:'meat'}
+];
+
+<<< NOTE >>> This types in "controls" array should meet the types you checking for in the "BurgerIndgredient" component.
+
+- Now inside the root div in "BuildControls" component, We want to loop through all the controls and render a buildControl for each of them. first let's import the "BuildControl" component.
+
+- Now inside the div root element, we use the "Map" method to execute a function on each element of the array "controls" and this function will be rendering the "BuildControl" for each one.
+
+>> The code in "BuildControls" component:
+=========================================
+import React from 'react';
+import classes from './BuildControls.module.css';
+import BuildControl from './BuildControl/BuildControl';
+
+const controls = [
+    {label:'Salad', type:'salad'},
+    {label:'Bacon', type:'bacon'},
+    {label:'Cheese', type:'cheese'},
+    {label:'Meat', type:'meat'}
+];
+
+const buildControls = (props) => (
+    <div className={classes.BuildControls}>
+        {controls.map(ctrl =>{
+<           BuildControl key={ctrl.label} label={ctrl.label}/>
+        })}
+    </div>
+);
+
+export default buildControls;
+*****************************************End of the Code*******************************************************
+
+- Save that file then go to "BurgerBuilder" component, and replace the second div with the new component "BuildControls" but don't forget to import it first.
+
+>> The code in "BurgerBuilder" component:
+=========================================
+import React, {Component} from 'react';
+import Aux from '../../hoc/Auxilliary';
+import Burger from '../../components/Burger/Burger';
+import BuildControls from '../../components/Burger/BuildControls/BuildControls'
+
+
+class BurgerBuilder extends Component{
+    state={
+        ingredients:{
+            salad:0,
+            bacon:0,
+            cheese:0,
+            meat:0
+        }
+    };
+
+    render(){
+        return(
+            <Aux>
+            <Burger ingredients={this.state.ingredients}/>
+            <BuildControls/>
+            </Aux>
+        );
+    }
+}
+
+export default BurgerBuilder;
+*****************************************End of the Code*******************************************************
+
+- In "BurgerBuilder" component, we need to tie up the buildControls with our real ingredients (that are defined in the state) so that the user could manage the burger on his own. Therefore we need some methods to be passed down to "BuildControls" so that we can add or remove an ingredient.
+
+1- "addIngredientHandler" which will recieve the type of ingredient that we want to add.
+2- "removeIngredientHandler" which also needs to know which type it should remove.
+
+<<< NOTE >>> Both methods will take "type" as an input parameter which refers to the type of the (Wanted to be added) ingredient.
+
+- Let's start with "addIngredientHandler":
+
+--> To add the ingredient, we need to know what the old ingredient count is. So we creat a constant called      "oldCount" and set it to "this.state.ingredients[type]" to hold the value of this ingredient with such type.
+>> const oldCount = this.state.ingredients[type];
+
+--> Then simply, we calculate the updated count by adding plus one.
+>> const updatedCount = oldCount + 1;
+
+--> Now we need to update the ingredients, we create a constant called "updatedIngredients" and using the spread out operator, we distibute the properties of the old ingredients state into the new "updatedIngredients" object like that,
+>> const updatedIngredients = {...this.state.ingredients};
+
+--> Then take the updatedIngredients object, access the type for which I have to update the ingredients and set the count the value which is just the amount of ingredients.
+>> updatedIngredients[type] = updatedCount;
+
+--> Now we can use "setState" method to update the ingredients state in an immutable way. But first let's also track the price. So in the state we add a property called "totalPrice" and let's set the starting price of the burger is 4$.
+>> state={
+        ingredients:{
+            salad:0,
+            bacon:0,
+            cheese:0,
+            meat:0
+        },
+        totalPrice: 4
+    };
+
+--> Now we need to update the price each time we add an ingredient, so we need to set a specifc price for each ingredient. Outside the class we create a constant called "INGREDIENT_PRICES" which will represent the prices of our ingredients like that,
+>> const INGREDIENT_PRICES = {
+    salad: 0.5,
+    cheese: 0.4,
+    meat: 1.3,
+    bacon: 0.7
+}
+
+--> Now update the total price with the type for the price we added. So we know that price addition is the INGREDIENT_PRICES for a given type. So we can fetch the price with it,
+>> const priceAddition = INGREDIENT_PRICES[type];
+
+--> Then make a constant called "oldPrice" to track the old price defined in the state,
+>> const oldPrice = this.state.totalPrice;
+
+--> Then simply add the oldPrice to the priceAddition making newPrice,
+>> const newPrice = oldPrice + priceAddition;
+
+--> Finally we set the state for updating the ingredients numbers and the totalPrice,
+>> this.setState({
+        totalPrice: newPrice,
+        ingredients: updatedIngredients
+    });
+
+--> The code of "addIngredientHandler" method:
+addIngredientHandler = (type) =>{
+        const oldCount = this.state.ingredients[type];
+        const updatedCount = oldCount + 1;
+        const updatedIngredients ={
+            ...this.state.ingredients
+        };
+        updatedIngredients[type] = updatedCount;
+
+        // To track the price of the constructed Burger
+        const priceAddition = INGREDIENT_PRICES[type];
+        const oldPrice = this.state.totalPrice;
+        const newPrice = oldPrice + priceAddition;
+        this.setState({
+            totalPrice: newPrice,
+            ingredients: updatedIngredients
+        });
+}
+
+- Now we can pass this method to "BuildControls" like that,
+>> <BuildControls ingredientAdded={this.addIngredientHandler}/>
+
+- In "BuildControls" component, we need to pass that "ingredientAdded" prop to the nested component "BuildControl" with the "type" as an argument like that,
+>> <BuildControl 
+        key={ctrl.label} 
+        label={ctrl.label} 
+        added={() => props.ingredientAdded(ctrl.type)}
+/>
+
+<<< NOTE >>> We use the arrow function above as we want to execute props.ingredientAdded and pass back the control type.
+
+- At last to make it work, we need to link up with the More button in "BuildControl" component, so we use the prop passed above "added" inside the button with an onClick listener like that,
+>> <button className={classes.More} onClick={props.added}>More</button>
+
+- Before running it, let's output the totalPrice. In "BurgerBuilder" we pass the totalPrice with "this.state" as a prop to "BuildControls" component.
+>> <BuildControls ingredientAdded={this.addIngredientHandler} price={this.state.totalPrice} />
+
+- Then in the last mentioned component inside the JSX returned div, we create a paragraph for it and use the "toFixed" method to print a decimal value,
+>> <p>Current Price: <strong>{props.price.toFixed(2)} $</strong></p>
+
+- If we save everything and run, we can see that we can add layers of ingredients easily with the totalPrice calculated above the controls.
+
+****************************
+
+- So far we are implementing "addIngredientHandler", let's start with "removeIngredientHandler" and try to remove an ingredient:
+
+--> The logic is a bit similar to "addIngredientHandler" method. We can just copy the same code for the adding but with some changes,
+>> removeIngredientHandler = (type) =>{
+        const oldCount = this.state.ingredients[type];
+        const updatedCount = oldCount - 1;
+        const updatedIngredients ={
+            ...this.state.ingredients
+        };
+
+        // To track the price of the constructed Burger
+        updatedIngredients[type] = updatedCount;
+        const priceDeduction = INGREDIENT_PRICES[type];
+        const oldPrice = this.state.totalPrice;
+        const newPrice = oldPrice - priceDeduction;
+
+        this.setState({
+            totalPrice: newPrice,
+            ingredients: updatedIngredients
+        });
+}
+
+--> And like "addIngredientHandler", Inside "BurgerBuilder" we pass it to "BuildControls",
+>> <BuildControls 
+        ingredientAdded={this.addIngredientHandler} 
+        ingredientRemoved={this.removeIngredientHandler}
+        price={this.state.totalPrice}
+/>
+
+--> The same happenes in "BuildControls" we pass the prop "ingredientRemoved" to the nested component "BuildControl" with the "type" as an argument like that,
+>> <BuildControl 
+        key={ctrl.label} 
+        label={ctrl.label} 
+        added={() => props.ingredientAdded(ctrl.type)}
+        removed={() => props.ingredientRemoved(ctrl.type)}
+/>
+
+--> Then we link it up with the "Less" button in "BuildControl".
+
+--> If we try to run, you see it works fine but there's a problem though. If we try to deducting or removing ingredients that is not added (In other words, there're no ingredients between the two bread slices), we will get an error as "Invalid array length" as the array we have been building in "Burger" component which is "transformedIngredients" will have a length of minus X.
+
+--> So in the "removeIngredientHandler", we need to check if there're no ingredients already added so that we do nothing and the function return empty. So we add a simple condition that checks the "oldCount" constant before removing a thing:
+>> if (oldCount <= 0){
+    return;
+}
+
+--> If we try to run now, we can see this case is handled. 
+
+****************************
+
+- Of course it would be even better if we got no ingredients added to make the "Less" button disabled. So let's add that logic too. We want to pass information about which buttons should be enabled and which should be disabled
+
+- In "BurgerBuilder" inside the render method before the return, we distribute the properties of "this.state.ingredients" to a newly created constant object called "disabledInfo".
+>> const disabledInfo = {
+    ...this.state.ingredients
+};
+
+- Then we loop throuh that all the keys in that object and simply check if this is zero or less, if it's true(meaning no ingredients), we should disable the button.
+>> for(let key in disabledInfo){
+    disabledInfo[key] = disabledInfo[key] <= 0
+}
+
+- Now we pass "disabledInfo" to "BuildControls" component,
+>> <BuildControls 
+    ingredientAdded={this.addIngredientHandler} 
+    ingredientRemoved={this.removeIngredientHandler}
+    price={this.state.totalPrice}
+    disabled={disabledInfo}
+/>
+
+- Then in "BuildControls", we pass it to the child component "BuildControl" to let it know if it should disable that button or not. Don't forget to include the ctrl type here.
+>> <BuildControl 
+    key={ctrl.label} 
+    label={ctrl.label} 
+    added={() => props.ingredientAdded(ctrl.type)}
+    removed={() => props.ingredientRemoved(ctrl.type)}
+    disabled={props.disabled[ctrl.type]}
+/>
+
+- And finally in "BuildControl", we can set the default property of HTML button "disabled" to the props we get.
+>>  <button 
+    className={classes.Less} 
+    onClick={props.removed} 
+    disabled={props.disabled}>Less</button>
+
+- So far we have built a full functional burger but one thing left, we need to add the Purhcase order button.
+
+- Now let's create a Modal which allows us to display an order summary. This should be shown when we click "Checkout" or purchase order. As this button should be under "BuildControls" section we can include it in this component.
+
+- We simply make a normal HTML button like that,
+>> <button>ORDER NOW</button>
+
+- Add some style for this button in "BuildControls.module.css". This styles include the normal styling of the button, the disabled style when we can't click it because there're no ingredients added and some animations to bring up the button after it's disabled. Import it like the noraml way.
+
+- Let's do the logic of disabling the button. We will make it in "BurgerBuilder" as it contain the ingredients state object and how much of each ingredient we wanted to add to that burger. What we need is the total amount of ingredients or sum of all of them to check if there's at least one ingredients so that we can enable the button.
+
+- Let's start with adding a property to the state called "purchasable" and set to false initially as expected.
+>> state={
+        ingredients:{
+            salad:0,
+            bacon:0,
+            cheese:0,
+            meat:0
+        },
+        totalPrice: 4,
+        purchasable: false
+};
+
+- Now purchasable should be true once at least one ingredient is added to the burger. Let's add a method called "updatedPurchaseState" this method will be responsible for updating the property "purchasable" if needed. We need to check the ingredients in the state.
+>> updatedPurchaseState() {
+    const ingredients = {
+        ...this.state.ingredients
+    };
+}
+
+- We need to sum up all the values in the ingredients but we need to convert it into an array so we create constant called "sum" that should contain the total of the added ingredients.
+>> updatedPurchaseState() {
+    const ingredients = {
+        ...this.state.ingredients
+    };
+
+    const sum = Object.keys(ingredients)
+        .map(igKey =>{
+            return ingredient[igKey];
+        });
+}
+
+<<< NOTE >>> We return the value of each key in ingredients to the constant "sum". For example we access the value of certain property let's assume that we have state like that,
+>> state={
+        ingredients:{
+            salad:1,
+            bacon:0,
+            cheese:1,
+            meat:2
+        }
+- Then we got an array of [1, 0, 1, 2] which is the sum array.
+
+- Now we need to add all the elements togther but inside the same array so we use the method "reduce".
+>> const sum = Object.keys(ingredients)
+        .map(igKey =>{
+            return ingredient[igKey];
+        })
+        .reduce((sum, el)=>{
+            return sum + el;
+        }, 0);
+}
+
+- Now we complete this logic we pass it down to "BuildControls" component as a prop like that,
+>> <BuildControls 
+        ingredientAdded={this.addIngredientHandler} 
+         ingredientRemoved={this.removeIngredientHandler}
+        disabled={disabledInfo}
+        price={this.state.totalPrice}
+        purchasable={this.state.purchasable}
+/>
+
+- In "BuildControls", we add to the property for HTML button "disabled" this prop but with inverting the {props.purchasable},
+>>  <button className={classes.OrderButton} disabled={!props.purchasable}>ORDER NOW</button> 
+
+- We then call the funtion at the end of addIngredientHandler and removeIngredientHandler methods.
+
+- If we try to run this we will notice that when we add the first ingredient, nothing changes !! but if we add another ingredient we see the logic works. This because due to how "setState" works, in the first time we may get old values of the state instead of the new so we can overcome this by adding the "updatedIngredients" as a parameter to the function when we call it at the end of these two functions.
+
+- In this way, we ensure we got the new right value of the state. And if we run this, it should work smoothly.
+
+>> So the code in "BurgerBuilder" component:
+=============================================================================
+import React, {Component} from 'react';
+import Aux from '../../hoc/Auxilliary';
+import Burger from '../../components/Burger/Burger';
+import BuildControls from '../../components/Burger/BuildControls/BuildControls'
+
+const INGREDIENT_PRICES = {
+    salad: 0.5,
+    cheese: 0.4,
+    meat: 1.3,
+    bacon: 0.7
+}
+
+class BurgerBuilder extends Component{
+    state={
+        ingredients:{
+            salad:0,
+            bacon:0,
+            cheese:0,
+            meat:0
+        },
+        totalPrice: 4,
+        purchasable: false
+    };
+
+    updatePurchaseState (ingredients){
+        // eslint-disable-next-line
+        const sum = Object.keys(ingredients)
+            .map(igKey =>{
+                return ingredients[igKey];
+            })
+            .reduce((sum, el) => {
+                return sum + el
+            }, 0);
+            // We use zero to indicate we don't add an outside value on the sum
+        
+        // At the end, sum either will be zero indicating no ingredients added or any other value representing the number of ingredients.
+
+        this.setState({purchasable: sum > 0});
+        // This will either true or false based on sum > 0 or not.
+    }
+
+    addIngredientHandler = (type) =>{
+        const oldCount = this.state.ingredients[type];
+        const updatedCount = oldCount + 1;
+        const updatedIngredients ={
+            ...this.state.ingredients
+        };
+        updatedIngredients[type] = updatedCount;
+
+        // To track the price of the constructed Burger
+        const priceAddition = INGREDIENT_PRICES[type];
+        const oldPrice = this.state.totalPrice;
+        const newPrice = oldPrice + priceAddition;
+
+        this.setState({
+            totalPrice: newPrice,
+            ingredients: updatedIngredients
+        });
+
+        this.updatePurchaseState(updatedIngredients);
+    }
+
+    removeIngredientHandler = (type) =>{
+        const oldCount = this.state.ingredients[type];
+
+        // Condition to check if the array "transformedIngredients" is zero or less
+        if (oldCount <= 0){
+            return;
+        }
+        const updatedCount = oldCount - 1;
+        const updatedIngredients ={
+            ...this.state.ingredients
+        };
+        updatedIngredients[type] = updatedCount;
+
+        // To track the price of the constructed Burger
+        const priceDeduction = INGREDIENT_PRICES[type];
+        const oldPrice = this.state.totalPrice;
+        const newPrice = oldPrice - priceDeduction;
+
+        this.setState({
+            totalPrice: newPrice,
+            ingredients: updatedIngredients
+        });
+
+        this.updatePurchaseState(updatedIngredients);
+    }
+
+    render(){
+        const disabledInfo = {
+            ...this.state.ingredients
+        };
+        // eslint-disable-next-line
+        for(let key in disabledInfo){   
+            disabledInfo[key] = disabledInfo[key] <= 0  
+            // disabledInfo[key] should be true or false, if it's true(meaning no ingredients), we should disable.
+        }
+        // {salad: true, meat: false, ...}
+        return(
+            <Aux>
+                <Burger ingredients={this.state.ingredients}/>
+                <BuildControls 
+                    ingredientAdded={this.addIngredientHandler} 
+                    ingredientRemoved={this.removeIngredientHandler}
+                    disabled={disabledInfo}
+                    price={this.state.totalPrice}
+                    purchasable={this.state.purchasable}
+                />
+            </Aux>
+        );
+    }
+}
+
+export default BurgerBuilder;
+*****************************************End of the Code*******************************************************
+
+- Now we will implement the Modal that should preview when we click the order button. We said before that we might need a "Backdrop" component for the Modal so let's create it now.

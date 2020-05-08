@@ -1,0 +1,28 @@
+.ContactData{
+    margin:20px auto;
+    width: 80%;
+    text-align: center;
+    box-shadow: 0 2px 3px #ccc;
+    border: 1px solid #eee;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+@media (min-width: 600px){
+    .ContactData{
+        width: 500px;
+    }
+}
+
+/* To know why we use the code of Button component, check the code of "ContactData" component */
+.Button {
+    background-color: transparent;
+    border: none;
+    color: #5C9210;
+    outline: none;
+    cursor: pointer;
+    font: inherit;
+    padding: 10px;
+    margin: 10px;
+    font-weight: bold;
+}
