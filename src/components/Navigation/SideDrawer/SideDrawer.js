@@ -4,6 +4,7 @@ import NavigationItems from '../NavigationItems/NavigationItems';
 import classes from './SideDrawer.module.css';
 import Backdrop from '../../UI/Backdrop/Backdrop';
 import Aux from '../../../hoc/Auxilliary/Auxilliary';
+import PropTypes from 'prop-types';
 
 const sideDrawer = (props) => {
     //... Attach some CSS to play with some animation when the drawer is shown.
@@ -24,6 +25,11 @@ const sideDrawer = (props) => {
             </div>
         </Aux>
     );
+};
+
+sideDrawer.propTypes = {
+    open: PropTypes.bool.isRequired,
+    closed: PropTypes.func.isRequired
 };
 
 export default sideDrawer;

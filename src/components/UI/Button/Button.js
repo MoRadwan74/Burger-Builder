@@ -6,7 +6,9 @@ const button = (props) => (
         className={[classes.Button, classes[props.btnType]].join(' ')} 
         onClick={props.clicked}
         disabled={props.disabled}
-        >{props.children}</button>
+    >
+        {props.children}
+    </button>
 );  
 // btnType will be danger or success button, we will set it by ourselves.
 
